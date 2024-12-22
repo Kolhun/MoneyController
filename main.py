@@ -1,8 +1,11 @@
 import dearpygui.dearpygui as dpg
+import dearpygui.demo as demo
 import json
 import pandas as pd
+import dearpygui_ext.themes as dpg_ext
+import os
+import shutil
 
-# Хранилище операций
 operations = []
 
 big_let_start = 0x00C0
@@ -24,14 +27,12 @@ def add_operation(sender, app_data, user_data):
     dpg.set_value("description_input", "")
 
 
-# Сохранение операций в JSON
 def save_operations(sender, app_data, user_data):
     with open("operations.json", "w", encoding="utf-8") as file:
         json.dump(operations, file, indent=4, ensure_ascii=False)
     dpg.set_value("status_text", "Операции сохранены в operations.json")
 
 
-# Загрузка операций из JSON
 def load_operations(sender, app_data, user_data):
     global operations
     try:
@@ -45,7 +46,6 @@ def load_operations(sender, app_data, user_data):
         dpg.set_value("status_text", f"Ошибка загрузки: {str(e)}")
 
 
-# Загрузка операций из XLSX
 def load_from_xlsx(sender, app_data, user_data):
     global operations
     file_path = dpg.get_value("xlsx_file_input")
@@ -62,9 +62,9 @@ def load_from_xlsx(sender, app_data, user_data):
         dpg.set_value("status_text", f"Ошибка загрузки: {str(e)}")
 
 
-# Интерфейс приложения
 dpg.create_context()
-dpg.create_viewport(title="Финансовый учёт", width=800, height=600)
+
+
 with dpg.font_registry():
     with dpg.font("EpilepsySans.ttf", 13, default_font=True) as font1:
         dpg.add_font_range_hint(dpg.mvFontRangeHint_Default)
@@ -79,6 +79,19 @@ with dpg.font_registry():
         dpg.add_font_chars([0x0451, 0x2116])
 
 dpg.bind_font(font1)
+
+dpg.create_viewport(title="Money Controller - v1.0", width=1024, height=768, clear_color=[255, 165, 0, 255])
+
+# if not os.path.exists("/imgui.ini"):
+#     shutil.copy("/imgui_default.ini", "/imgui.ini")
+
+dpg.configure_app(init_file="/imgui.ini")
+demo.show_demo()
+light_theme = dpg_ext.create_theme_imgui_light()
+dpg.bind_theme(light_theme)
+
+
+
 with dpg.window(label="Финансовый учёт", width=800, height=600):
     dpg.add_text("Добавить операцию")
     dpg.add_input_text(label="Категория", tag="category_input")
@@ -109,7 +122,6 @@ with dpg.window(label="Финансовый учёт", width=800, height=600):
     dpg.add_separator()
     dpg.add_text("", tag="status_text")
 
-dpg.create_viewport()
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
